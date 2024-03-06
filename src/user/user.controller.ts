@@ -62,8 +62,8 @@ export class UserController {
     return user;
   }
 
-  @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id') id: string) {
     if (!uuidValidate(id)) {
       throw new BadRequestException('Invalid user ID format');

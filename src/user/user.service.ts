@@ -43,6 +43,8 @@ export class UserService {
     }
     if (user.password === updateUserDto.oldPassword) {
       user.password = updateUserDto.newPassword;
+      user.version = user.version + 1;
+      user.updatedAt = Date.now();
       return omitPassword(user);
     } else {
       return null;
@@ -56,7 +58,8 @@ export class UserService {
       return undefined;
     }
     if (userIndex) {
-      this.users.splice(userIndex, 1);
+      const deleteUser = this.users.splice(userIndex, 1);
+      return omitPassword(deleteUser[0]);
     }
   }
 }
