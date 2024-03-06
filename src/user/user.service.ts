@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
+import { omitPassword } from './omit';
 
 @Injectable()
 export class UserService {
@@ -18,27 +19,44 @@ export class UserService {
       updatedAt: Date.now(),
     };
     this.users.push(newUser);
-    const userWithoutPassword = { ...newUser };
-    delete userWithoutPassword.password;
-    return userWithoutPassword;
+    return omitPassword(newUser);
   }
 
   findAll() {
-    return this.users;
+    const users = this.users.slice();
+    return users.map((user) => omitPassword(user));
   }
 
   findOne(id: string) {
-    const user = this.users.find((user) => user.id === id);
-    return user;
+    const users = this.users.slice();
+    const user = users.find((user) => user.id === id);
+    if (user) {
+      return omitPassword(user);
+    }
   }
 
   updatePassword(id: string, updateUserDto: UpdateUserDto) {
-    const user = this.findOne(id);
-    user.password = updateUserDto.newPassword;
-    return user;
+    const user = this.users.find((user) => user.id === id);
+
+    if (!user) {
+      return undefined;
+    }
+    if (user.password === updateUserDto.oldPassword) {
+      user.password = updateUserDto.newPassword;
+      return omitPassword(user);
+    } else {
+      return null;
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  remove(id: string) {
+    const userIndex = this.users.findIndex((user) => user.id === id);
+
+    if (userIndex === -1) {
+      return undefined;
+    }
+    if (userIndex) {
+      this.users.splice(userIndex, 1);
+    }
   }
 }

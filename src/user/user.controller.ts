@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   HttpCode,
@@ -12,6 +11,8 @@ import {
   ValidationPipe,
   BadRequestException,
   NotFoundException,
+  ForbiddenException,
+  Put,
 } from '@nestjs/common';
 import { validate as uuidValidate } from 'uuid';
 import { UserService } from './user.service';
@@ -40,20 +41,37 @@ export class UserController {
       throw new BadRequestException('Invalid user ID format');
     }
     const user = this.userService.findOne(id);
-    if (user) {
-      return user;
-    } else {
+    if (!user) {
       throw new NotFoundException('User not found');
     }
+    return user;
   }
 
-  @Patch(':id')
+  @UsePipes(new ValidationPipe())
+  @Put(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.updatePassword(id, updateUserDto);
+    if (!uuidValidate(id)) {
+      throw new BadRequestException('Invalid user ID format');
+    }
+    const user = this.userService.updatePassword(id, updateUserDto);
+    if (user === undefined) {
+      throw new NotFoundException('User not found');
+    } else if (user === null) {
+      throw new ForbiddenException('Incorrect password');
+    }
+    return user;
   }
 
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+    if (!uuidValidate(id)) {
+      throw new BadRequestException('Invalid user ID format');
+    }
+    const user = this.userService.remove(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
   }
 }
