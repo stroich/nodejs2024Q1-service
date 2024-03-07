@@ -9,12 +9,11 @@ import {
   HttpStatus,
   UsePipes,
   ValidationPipe,
-  BadRequestException,
   NotFoundException,
   ForbiddenException,
   Put,
+  ParseUUIDPipe,
 } from '@nestjs/common';
-import { validate as uuidValidate } from 'uuid';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -36,10 +35,7 @@ export class UserController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    if (!uuidValidate(id)) {
-      throw new BadRequestException('Invalid user ID format');
-    }
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
     const user = this.userService.findOne(id);
     if (!user) {
       throw new NotFoundException('User not found');
@@ -49,10 +45,10 @@ export class UserController {
 
   @UsePipes(new ValidationPipe())
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    if (!uuidValidate(id)) {
-      throw new BadRequestException('Invalid user ID format');
-    }
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
     const user = this.userService.updatePassword(id, updateUserDto);
     if (user === undefined) {
       throw new NotFoundException('User not found');
@@ -64,10 +60,7 @@ export class UserController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id') id: string) {
-    if (!uuidValidate(id)) {
-      throw new BadRequestException('Invalid user ID format');
-    }
+  remove(@Param('id', ParseUUIDPipe) id: string) {
     const user = this.userService.remove(id);
     if (!user) {
       throw new NotFoundException('User not found');
