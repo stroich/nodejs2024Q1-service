@@ -31,12 +31,12 @@ export class UserController {
 
   @Get()
   findAll() {
-    return this.userService.findAll();
+    return this.userService.findAllWithoutPassport();
   }
 
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string) {
-    const user = this.userService.findOne(id);
+    const user = this.userService.findOneWithoutPassport(id);
     if (!user) {
       throw new NotFoundException('User not found');
     }

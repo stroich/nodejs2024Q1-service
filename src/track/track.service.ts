@@ -3,11 +3,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { Track } from './entities/track.entity';
+import { BaseService } from 'src/shared/BaseService';
 
 @Injectable()
-export class TrackService {
-  private tracks: Array<Track> = [];
-
+export class TrackService extends BaseService<Track> {
   create(createTrackDto: CreateTrackDto) {
     const newTrack: Track = {
       id: uuidv4(),
@@ -16,16 +15,8 @@ export class TrackService {
       albumId: 'albumId' in createTrackDto ? createTrackDto.albumId : null,
       duration: createTrackDto.duration,
     };
-    this.tracks.push(newTrack);
+    this.entities.push(newTrack);
     return newTrack;
-  }
-
-  findAll() {
-    return this.tracks;
-  }
-
-  findOne(id: string) {
-    return this.tracks.find((track) => track.id === id);
   }
 
   update(id: string, updateTrackDto: UpdateTrackDto) {
@@ -42,17 +33,6 @@ export class TrackService {
         'albumId' in updateTrackDto ? updateTrackDto.albumId : null;
       track.duration = updateTrackDto.duration;
       return track;
-    }
-  }
-
-  remove(id: string) {
-    const trackIndex = this.tracks.findIndex((user) => user.id === id);
-
-    if (trackIndex === -1) {
-      return undefined;
-    }
-    if (trackIndex) {
-      return this.tracks.splice(trackIndex, 1);
     }
   }
 }

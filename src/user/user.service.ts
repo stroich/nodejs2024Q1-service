@@ -4,11 +4,10 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { omitPassword } from './omit';
+import { BaseService } from 'src/shared/BaseService';
 
 @Injectable()
-export class UserService {
-  private users: Array<User> = [];
-
+export class UserService extends BaseService<User> {
   create(createUserDto: CreateUserDto) {
     const newUser: User = {
       id: uuidv4(),
@@ -18,17 +17,17 @@ export class UserService {
       createdAt: Date.now(),
       updatedAt: Date.now(),
     };
-    this.users.push(newUser);
+    this.entities.push(newUser);
     return omitPassword(newUser);
   }
 
-  findAll() {
-    const users = this.users.slice();
+  findAllWithoutPassport() {
+    const users = this.entities.slice();
     return users.map((user) => omitPassword(user));
   }
 
-  findOne(id: string) {
-    const users = this.users.slice();
+  findOneWithoutPassport(id: string) {
+    const users = this.entities.slice();
     const user = users.find((user) => user.id === id);
     if (user) {
       return omitPassword(user);
@@ -36,7 +35,7 @@ export class UserService {
   }
 
   updatePassword(id: string, updateUserDto: UpdateUserDto) {
-    const user = this.users.find((user) => user.id === id);
+    const user = this.entities.find((user) => user.id === id);
 
     if (!user) {
       return undefined;
@@ -48,18 +47,6 @@ export class UserService {
       return omitPassword(user);
     } else {
       return null;
-    }
-  }
-
-  remove(id: string) {
-    const userIndex = this.users.findIndex((user) => user.id === id);
-
-    if (userIndex === -1) {
-      return undefined;
-    }
-    if (userIndex) {
-      const deleteUser = this.users.splice(userIndex, 1);
-      return omitPassword(deleteUser[0]);
     }
   }
 }
