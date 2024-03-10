@@ -58,7 +58,7 @@ export class ArtistController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id', ParseUUIDPipe) id: string) {
-    const artist = this.artistService.remove(id);
+    const artist = this.artistService.removeFromTrackAndAlmum(id);
     if (!artist) {
       throw new NotFoundException('Artist not found');
     }

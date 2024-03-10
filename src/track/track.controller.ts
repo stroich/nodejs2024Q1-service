@@ -37,7 +37,7 @@ export class TrackController {
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     const user = this.trackService.findOne(id);
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('Track not found');
     }
     return user;
   }
@@ -50,7 +50,7 @@ export class TrackController {
   ) {
     const track = this.trackService.update(id, updateTrackDto);
     if (track === undefined) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('Track not found');
     }
     return track;
   }
@@ -60,7 +60,7 @@ export class TrackController {
   remove(@Param('id', ParseUUIDPipe) id: string) {
     const track = this.trackService.remove(id);
     if (!track) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('Track not found');
     }
     return track;
   }

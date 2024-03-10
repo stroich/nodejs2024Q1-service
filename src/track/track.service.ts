@@ -7,6 +7,22 @@ import { BaseService } from 'src/shared/BaseService';
 
 @Injectable()
 export class TrackService extends BaseService<Track> {
+  changeArtistIdToNull(artistId: string): void {
+    this.entities.forEach((track) => {
+      if (track.artistId === artistId) {
+        track.artistId = null;
+      }
+    });
+  }
+
+  changeAlbumIdToNull(albumId: string): void {
+    this.entities.forEach((track) => {
+      if (track.albumId === albumId) {
+        track.albumId = null;
+      }
+    });
+  }
+
   create(createTrackDto: CreateTrackDto) {
     const newTrack: Track = {
       id: uuidv4(),
