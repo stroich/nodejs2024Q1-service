@@ -6,6 +6,8 @@ import { BaseService } from 'src/shared/BaseService';
 import { Artist } from './entities/artist.entity';
 import { TrackService } from 'src/track/track.service';
 import { AlbumService } from 'src/album/album.service';
+import { FavsService } from 'src/favs/favs.service';
+import { FavsEntity } from 'src/favs/fav.type';
 
 @Injectable()
 export class ArtistService extends BaseService<Artist> {
