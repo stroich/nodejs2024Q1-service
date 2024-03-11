@@ -1,4 +1,4 @@
-import { User } from './entities/user.entity';
+import { User } from 'src/database/type';
 
 export function omitPassword(user: User): Omit<User, 'password'> {
   return {

@@ -1,10 +1,7 @@
-import { Album } from 'src/album/entities/album.entity';
 import { BaseService } from './BaseService';
-import { Artist } from 'src/artist/entities/artist.entity';
-import { User } from 'src/user/entities/user.entity';
-import { Track } from 'src/track/entities/track.entity';
 import { Injectable } from '@nestjs/common';
 import { FavsService } from './FavsServise';
+import { Album, Artist, Track, User } from './type';
 
 @Injectable()
 export class DataBase {

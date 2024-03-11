@@ -2,9 +2,9 @@ import { Inject, Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
-import { Album } from './entities/album.entity';
 import { FavsEntity } from 'src/favs/fav.type';
 import { DataBase } from 'src/database/dataBase';
+import { Album } from 'src/database/type';
 
 @Injectable()
 export class AlbumService {

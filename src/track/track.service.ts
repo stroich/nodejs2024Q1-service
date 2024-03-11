@@ -2,9 +2,9 @@ import { Inject, Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
-import { Track } from './entities/track.entity';
 import { DataBase } from 'src/database/dataBase';
 import { FavsEntity } from 'src/favs/fav.type';
+import { Track } from 'src/database/type';
 
 @Injectable()
 export class TrackService {
