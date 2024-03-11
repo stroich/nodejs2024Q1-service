@@ -3,21 +3,19 @@ import { v4 as uuidv4 } from 'uuid';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { Album } from './entities/album.entity';
-import { BaseService } from 'src/shared/BaseService';
-import { TrackService } from 'src/track/track.service';
+import { FavsEntity } from 'src/favs/fav.type';
+import { DataBase } from 'src/database/dataBase';
 
 @Injectable()
-export class AlbumService extends BaseService<Album> {
-  constructor(@Inject(TrackService) private trackService: TrackService) {
-    super();
+export class AlbumService {
+  constructor(@Inject(DataBase) private dataBase: DataBase) {}
+
+  findAll() {
+    return this.dataBase.albumService.findAll();
   }
 
-  changeArtistIdToNull(artistId: string): void {
-    this.entities.forEach((album) => {
-      if (album.artistId === artistId) {
-        album.artistId = null;
-      }
-    });
+  findOne(id: string) {
+    return this.dataBase.albumService.findOne(id);
   }
 
   create(createAlbumDto: CreateAlbumDto) {
@@ -27,12 +25,12 @@ export class AlbumService extends BaseService<Album> {
       artistId: 'artistId' in createAlbumDto ? createAlbumDto.artistId : null,
       year: createAlbumDto.year,
     };
-    this.entities.push(newAlbum);
+    this.dataBase.albumService.addEnity(newAlbum);
     return newAlbum;
   }
 
   update(id: string, updateAlbumDto: UpdateAlbumDto) {
-    const album = this.findOne(id);
+    const album = this.dataBase.albumService.findOne(id);
 
     if (!album) {
       return undefined;
@@ -46,10 +44,11 @@ export class AlbumService extends BaseService<Album> {
     }
   }
 
-  removeFromTrack(id: string) {
-    const album = this.remove(id);
+  remove(id: string) {
+    const album = this.dataBase.albumService.remove(id);
     if (album) {
-      this.trackService.changeAlbumIdToNull(id);
+      this.dataBase.changeAlbumIdInTruckservice(id);
+      this.dataBase.favsService.remove(FavsEntity.album, id);
     }
     return album;
   }

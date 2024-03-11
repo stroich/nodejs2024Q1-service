@@ -58,7 +58,7 @@ export class AlbumController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id', ParseUUIDPipe) id: string) {
-    const album = this.albumService.removeFromTrack(id);
+    const album = this.albumService.remove(id);
     if (!album) {
       throw new NotFoundException('Album not found');
     }

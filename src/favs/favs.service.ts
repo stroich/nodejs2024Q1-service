@@ -1,48 +1,34 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { AlbumService } from 'src/album/album.service';
-import { ArtistService } from 'src/artist/artist.service';
-import { TrackService } from 'src/track/track.service';
-import { Fav } from './entities/fav.entity';
-import { Arr } from './fav.type';
+import { DataBase } from 'src/database/dataBase';
 
 @Injectable()
 export class FavsService {
-  private favs: Fav = {
-    artists: [],
-    albums: [],
-    tracks: [],
-  };
-
-  constructor(
-    @Inject(TrackService) private trackService: TrackService,
-    @Inject(AlbumService) private albumService: AlbumService,
-    @Inject(ArtistService) private artistService: ArtistService,
-  ) {}
+  constructor(@Inject(DataBase) private dataBase: DataBase) {}
 
   findAll() {
-    return this.favs;
+    return this.dataBase.favsService.getFavs();
   }
 
   create(opetation: string, id: string) {
     const actions = {
       track: () => {
-        const fav = this.trackService.findOne(id);
+        const fav = this.dataBase.trackService.findOne(id);
         if (fav) {
-          this.favs.tracks.push(fav);
+          this.dataBase.favsService.addEnityInTracks(fav);
         }
         return fav;
       },
       album: () => {
-        const fav = this.albumService.findOne(id);
+        const fav = this.dataBase.albumService.findOne(id);
         if (fav) {
-          this.favs.albums.push(fav);
+          this.dataBase.favsService.addEnityInAlbums(fav);
         }
         return fav;
       },
       artist: () => {
-        const fav = this.artistService.findOne(id);
+        const fav = this.dataBase.artistService.findOne(id);
         if (fav) {
-          this.favs.artists.push(fav);
+          this.dataBase.favsService.addEnityInArtists(fav);
         }
         return fav;
       },
@@ -51,34 +37,10 @@ export class FavsService {
     const action = actions[opetation];
     if (action) {
       return action();
-    }
-  }
-
-  removeFav(arr: Arr, id: string) {
-    const trackIndex = arr.findIndex((user) => user.id === id);
-    if (trackIndex === -1) {
-      return undefined;
-    } else {
-      return arr.splice(trackIndex, 1);
     }
   }
 
   remove(opetation: string, id: string) {
-    const actions = {
-      track: () => {
-        return this.removeFav(this.favs.tracks, id);
-      },
-      album: () => {
-        return this.removeFav(this.favs.albums, id);
-      },
-      artist: () => {
-        return this.removeFav(this.favs.artists, id);
-      },
-    };
-
-    const action = actions[opetation];
-    if (action) {
-      return action();
-    }
+    return this.dataBase.favsService.remove(opetation, id);
   }
 }

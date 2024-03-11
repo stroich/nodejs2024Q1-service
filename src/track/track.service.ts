@@ -1,26 +1,21 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { Track } from './entities/track.entity';
-import { BaseService } from 'src/shared/BaseService';
+import { DataBase } from 'src/database/dataBase';
+import { FavsEntity } from 'src/favs/fav.type';
 
 @Injectable()
-export class TrackService extends BaseService<Track> {
-  changeArtistIdToNull(artistId: string): void {
-    this.entities.forEach((track) => {
-      if (track.artistId === artistId) {
-        track.artistId = null;
-      }
-    });
+export class TrackService {
+  constructor(@Inject(DataBase) private dataBase: DataBase) {}
+
+  findAll() {
+    return this.dataBase.trackService.findAll();
   }
 
-  changeAlbumIdToNull(albumId: string): void {
-    this.entities.forEach((track) => {
-      if (track.albumId === albumId) {
-        track.albumId = null;
-      }
-    });
+  findOne(id: string) {
+    return this.dataBase.trackService.findOne(id);
   }
 
   create(createTrackDto: CreateTrackDto) {
@@ -31,12 +26,12 @@ export class TrackService extends BaseService<Track> {
       albumId: 'albumId' in createTrackDto ? createTrackDto.albumId : null,
       duration: createTrackDto.duration,
     };
-    this.entities.push(newTrack);
+    this.dataBase.trackService.addEnity(newTrack);
     return newTrack;
   }
 
   update(id: string, updateTrackDto: UpdateTrackDto) {
-    const track = this.findOne(id);
+    const track = this.dataBase.trackService.findOne(id);
 
     if (!track) {
       return undefined;
@@ -50,5 +45,14 @@ export class TrackService extends BaseService<Track> {
       track.duration = updateTrackDto.duration;
       return track;
     }
+  }
+
+  remove(id: string) {
+    const track = this.dataBase.trackService.remove(id);
+    if (track) {
+      this.dataBase.changeAlbumIdInTruckservice(id);
+      this.dataBase.favsService.remove(FavsEntity.track, id);
+    }
+    return track;
   }
 }

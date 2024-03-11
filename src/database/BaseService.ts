@@ -5,6 +5,22 @@ export interface Entity {
 export class BaseService<T extends Entity> {
   protected entities: T[] = [];
 
+  addEnity(entity: T) {
+    this.entities.push(entity);
+  }
+
+  updateEntity(id: string, entity: T) {
+    const index = this.entities.findIndex((entity) => entity.id === id);
+
+    if (index === -1) {
+      return undefined;
+    }
+
+    this.entities[index] = entity;
+
+    return entity;
+  }
+
   findAll() {
     return this.entities;
   }

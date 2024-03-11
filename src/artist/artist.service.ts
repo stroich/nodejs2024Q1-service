@@ -2,20 +2,20 @@ import { Inject, Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
-import { BaseService } from 'src/shared/BaseService';
 import { Artist } from './entities/artist.entity';
-import { TrackService } from 'src/track/track.service';
-import { AlbumService } from 'src/album/album.service';
-import { FavsService } from 'src/favs/favs.service';
 import { FavsEntity } from 'src/favs/fav.type';
+import { DataBase } from 'src/database/dataBase';
 
 @Injectable()
-export class ArtistService extends BaseService<Artist> {
-  constructor(
-    @Inject(TrackService) private trackService: TrackService,
-    @Inject(AlbumService) private albumService: AlbumService,
-  ) {
-    super();
+export class ArtistService {
+  constructor(@Inject(DataBase) private dataBase: DataBase) {}
+
+  findAll() {
+    return this.dataBase.artistService.findAll();
+  }
+
+  findOne(id: string) {
+    return this.dataBase.artistService.findOne(id);
   }
 
   create(createArtistDto: CreateArtistDto) {
@@ -24,12 +24,12 @@ export class ArtistService extends BaseService<Artist> {
       name: createArtistDto.name,
       grammy: createArtistDto.grammy,
     };
-    this.entities.push(newArtist);
+    this.dataBase.artistService.addEnity(newArtist);
     return newArtist;
   }
 
   update(id: string, updateArtistDto: UpdateArtistDto) {
-    const artist = this.findOne(id);
+    const artist = this.dataBase.artistService.findOne(id);
 
     if (!artist) {
       return undefined;
@@ -41,11 +41,12 @@ export class ArtistService extends BaseService<Artist> {
     }
   }
 
-  removeFromTrackAndAlmum(id: string) {
-    const artist = this.remove(id);
+  remove(id: string) {
+    const artist = this.dataBase.artistService.remove(id);
     if (artist) {
-      this.trackService.changeArtistIdToNull(id);
-      this.albumService.changeArtistIdToNull(id);
+      this.dataBase.changeArtistIDInTruckservice(id);
+      this.dataBase.changeArtistIDInAlbumservice(id);
+      this.dataBase.favsService.remove(FavsEntity.artist, id);
     }
     return artist;
   }
