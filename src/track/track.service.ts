@@ -1,57 +1,43 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
+import { Injectable } from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
-import { DataBase } from 'src/database/dataBase';
-import { FavsEntity } from 'src/favs/fav.type';
-import { Track } from 'src/database/type';
+import { Track } from '@prisma/client';
+import { PrismaService } from 'src/database/prisma.service';
 
 @Injectable()
 export class TrackService {
-  constructor(@Inject(DataBase) private dataBase: DataBase) {}
+  constructor(private readonly dataBase: PrismaService) {}
 
-  findAll() {
-    return this.dataBase.trackService.findAll();
+  async findAll(): Promise<Track[]> {
+    return this.dataBase.track.findMany();
   }
 
-  findOne(id: string) {
-    return this.dataBase.trackService.findOne(id);
+  async findOne(id: string) {
+    return this.dataBase.track.findUnique({ where: { id } });
   }
 
-  create(createTrackDto: CreateTrackDto) {
-    const newTrack: Track = {
-      id: uuidv4(),
-      name: createTrackDto.name,
-      artistId: 'artistId' in createTrackDto ? createTrackDto.artistId : null,
-      albumId: 'albumId' in createTrackDto ? createTrackDto.albumId : null,
-      duration: createTrackDto.duration,
-    };
-    this.dataBase.trackService.addEnity(newTrack);
-    return newTrack;
+  async create(createTrackDto: CreateTrackDto) {
+    return this.dataBase.track.create({ data: createTrackDto });
   }
 
-  update(id: string, updateTrackDto: UpdateTrackDto) {
-    const track = this.dataBase.trackService.findOne(id);
+  async update(id: string, updateTrackDto: UpdateTrackDto) {
+    const track = await this.findOne(id);
 
     if (!track) {
       return undefined;
     }
     if (track) {
-      track.name = updateTrackDto.name;
-      track.artistId =
-        'artistId' in updateTrackDto ? updateTrackDto.artistId : null;
-      track.albumId =
-        'albumId' in updateTrackDto ? updateTrackDto.albumId : null;
-      track.duration = updateTrackDto.duration;
-      return track;
+      return this.dataBase.track.update({
+        where: { id },
+        data: updateTrackDto,
+      });
     }
   }
 
-  remove(id: string) {
-    const track = this.dataBase.trackService.remove(id);
+  async remove(id: string) {
+    const track = await this.findOne(id);
     if (track) {
-      this.dataBase.changeAlbumIdInTruckservice(id);
-      this.dataBase.favsService.remove(FavsEntity.track, id);
+      return await this.dataBase.track.delete({ where: { id } });
     }
     return track;
   }
