@@ -19,17 +19,17 @@ export class FavsController {
   constructor(private readonly favsService: FavsService) {}
 
   @Get()
-  findAll() {
+  async findAll() {
     return this.favsService.findAll();
   }
 
   @Post(':operation/:id')
   @HttpCode(HttpStatus.CREATED)
-  create(
+  async create(
     @Param('id', ParseUUIDPipe) id: string,
     @Param('operation', new ParseEnumPipe(FavsEntity)) operation: string,
   ) {
-    const track = this.favsService.create(operation, id);
+    const track = await this.favsService.create(operation, id);
     if (!track) {
       throw new UnprocessableEntityException(`${operation} not found`);
     }
@@ -38,11 +38,11 @@ export class FavsController {
 
   @Delete(':operation/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(
+  async remove(
     @Param('id', ParseUUIDPipe) id: string,
     @Param('operation', new ParseEnumPipe(FavsEntity)) operation: string,
   ) {
-    const track = this.favsService.remove(operation, id);
+    const track = await this.favsService.remove(operation, id);
     if (!track) {
       throw new NotFoundException(`${operation} not found`);
     }

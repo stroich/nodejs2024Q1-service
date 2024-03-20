@@ -1,46 +1,97 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { DataBase } from 'src/database/dataBase';
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from 'src/database/prisma.service';
 
 @Injectable()
 export class FavsService {
-  constructor(@Inject(DataBase) private dataBase: DataBase) {}
+  constructor(private readonly dataBase: PrismaService) {}
 
-  findAll() {
-    return this.dataBase.favsService.getFavs();
+  async createEmptyFavs() {
+    const favorites = await this.dataBase.favorites.findUnique({
+      where: { id: 'favs' },
+    });
+    if (!favorites) {
+      await this.dataBase.favorites.create({
+        data: { id: 'favs' },
+      });
+    }
   }
 
-  create(opetation: string, id: string) {
+  async findAll() {
+    await this.createEmptyFavs();
+    const favs = await this.dataBase.favorites.findUnique({
+      where: { id: 'favs' },
+      select: { artists: true, albums: true, tracks: true },
+    });
+    return favs;
+  }
+
+  async create(opetation: string, id: string) {
+    await this.createEmptyFavs();
     const actions = {
-      track: () => {
-        const fav = this.dataBase.trackService.findOne(id);
+      track: async () => {
+        const fav = await this.dataBase.track.findUnique({ where: { id } });
+        console.log(fav);
         if (fav) {
-          this.dataBase.favsService.addEnityInTracks(fav);
+          await this.dataBase.track.update({
+            where: { id },
+            data: { favoritesId: 'favs' },
+          });
         }
         return fav;
       },
-      album: () => {
-        const fav = this.dataBase.albumService.findOne(id);
+      album: async () => {
+        const fav = await this.dataBase.album.findUnique({ where: { id } });
         if (fav) {
-          this.dataBase.favsService.addEnityInAlbums(fav);
+          await this.dataBase.album.update({
+            where: { id },
+            data: { favoritesId: 'favs' },
+          });
         }
         return fav;
       },
-      artist: () => {
-        const fav = this.dataBase.artistService.findOne(id);
+      artist: async () => {
+        const fav = await this.dataBase.artist.findUnique({ where: { id } });
         if (fav) {
-          this.dataBase.favsService.addEnityInArtists(fav);
+          await this.dataBase.artist.update({
+            where: { id },
+            data: { favoritesId: 'favs' },
+          });
         }
         return fav;
       },
     };
 
-    const action = actions[opetation];
+    const action = await actions[opetation];
     if (action) {
-      return action();
+      return await action();
     }
   }
 
-  remove(opetation: string, id: string) {
-    return this.dataBase.favsService.remove(opetation, id);
+  async remove(opetation: string, id: string) {
+    const actions = {
+      track: async () => {
+        return await this.dataBase.track.update({
+          where: { id },
+          data: { favoritesId: null },
+        });
+      },
+      album: async () => {
+        return await this.dataBase.album.update({
+          where: { id },
+          data: { favoritesId: null },
+        });
+      },
+      artist: async () => {
+        return await this.dataBase.artist.update({
+          where: { id },
+          data: { favoritesId: null },
+        });
+      },
+    };
+
+    const action = await actions[opetation];
+    if (action) {
+      return await action();
+    }
   }
 }
