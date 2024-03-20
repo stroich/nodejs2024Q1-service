@@ -25,18 +25,18 @@ export class UserController {
   @UsePipes(new ValidationPipe())
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() createUserDto: CreateUserDto) {
+  async create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
 
   @Get()
-  findAll() {
+  async findAll() {
     return this.userService.findAllWithoutPassport();
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    const user = this.userService.findOneWithoutPassport(id);
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
+    const user = await this.userService.findOneWithoutPassport(id);
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -45,11 +45,11 @@ export class UserController {
 
   @UsePipes(new ValidationPipe())
   @Put(':id')
-  update(
+  async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    const user = this.userService.updatePassword(id, updateUserDto);
+    const user = await this.userService.updatePassword(id, updateUserDto);
     if (user === undefined) {
       throw new NotFoundException('User not found');
     } else if (user === null) {
@@ -60,8 +60,8 @@ export class UserController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id', ParseUUIDPipe) id: string) {
-    const user = this.userService.remove(id);
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
+    const user = await this.userService.remove(id);
     if (!user) {
       throw new NotFoundException('User not found');
     }

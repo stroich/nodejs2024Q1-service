@@ -1,58 +1,57 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
+import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { omitPassword } from './omit';
-import { DataBase } from 'src/database/dataBase';
-import { User } from 'src/database/type';
+import { PrismaService } from 'src/database/prisma.service';
 
 @Injectable()
 export class UserService {
-  constructor(@Inject(DataBase) private dataBase: DataBase) {}
+  constructor(private readonly dataBase: PrismaService) {}
 
-  create(createUserDto: CreateUserDto) {
-    const newUser: User = {
-      id: uuidv4(),
-      login: createUserDto.login,
-      password: createUserDto.password,
-      version: 1,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    };
-    this.dataBase.userService.addEnity(newUser);
+  async create(createUserDto: CreateUserDto) {
+    const newUser = await this.dataBase.user.create({
+      data: createUserDto,
+    });
     return omitPassword(newUser);
   }
 
-  findAllWithoutPassport() {
-    const users = this.dataBase.userService.findAll().slice();
+  async findAllWithoutPassport() {
+    const users = await this.dataBase.user.findMany();
     return users.map((user) => omitPassword(user));
   }
 
-  findOneWithoutPassport(id: string) {
-    const users = this.dataBase.userService.findAll().slice();
-    const user = users.find((user) => user.id === id);
+  async findOneWithoutPassport(id: string) {
+    const user = await this.dataBase.user.findUnique({ where: { id } });
     if (user) {
       return omitPassword(user);
     }
+    return user;
   }
 
-  updatePassword(id: string, updateUserDto: UpdateUserDto) {
-    const user = this.dataBase.userService.findOne(id);
-
+  async updatePassword(id: string, updateUserDto: UpdateUserDto) {
+    const user = await this.dataBase.user.findUnique({ where: { id } });
     if (!user) {
       return undefined;
     }
     if (user.password === updateUserDto.oldPassword) {
-      user.password = updateUserDto.newPassword;
-      user.version = user.version + 1;
-      user.updatedAt = Date.now();
-      return omitPassword(user);
+      const upDateUser = await this.dataBase.user.update({
+        where: { id },
+        data: {
+          password: updateUserDto.newPassword,
+          version: { increment: 1 },
+        },
+      });
+      return omitPassword(upDateUser);
     } else {
       return null;
     }
   }
 
-  remove(id: string) {
-    return this.dataBase.userService.remove(id);
+  async remove(id: string) {
+    try {
+      return await this.dataBase.user.delete({ where: { id } });
+    } catch (e) {
+      return undefined;
+    }
   }
 }

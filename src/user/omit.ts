@@ -1,11 +1,11 @@
-import { User } from 'src/database/type';
+import { User } from '@prisma/client';
 
-export function omitPassword(user: User): Omit<User, 'password'> {
+export function omitPassword(user: User) {
   return {
     id: user.id,
     login: user.login,
     version: user.version,
-    createdAt: user.createdAt,
-    updatedAt: user.updatedAt,
+    createdAt: Number(user.createdAt),
+    updatedAt: Number(user.updatedAt),
   };
 }
