@@ -7,8 +7,8 @@ services:
     restart: always
     ports:
       - ${PORT}:${PORT}
-    environment:
-      - PORT=${PORT}
+    env_file:
+      - .env
     depends_on:
       db:
         condition: service_healthy
@@ -29,8 +29,13 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    volumes:
+      - db-data:/var/lib/postgresql/data
     networks:
       - app-network
+
+volumes:
+  db-data:
 
 networks:
   app-network:
