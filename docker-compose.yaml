@@ -4,6 +4,7 @@ services:
   app:
     container_name: app
     build: .
+    restart: always
     ports:
       - ${PORT}:${PORT}
     environment:
