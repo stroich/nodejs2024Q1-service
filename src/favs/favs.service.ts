@@ -20,7 +20,32 @@ export class FavsService {
     await this.createEmptyFavs();
     const favs = await this.dataBase.favorites.findUnique({
       where: { id: 'favs' },
-      select: { artists: true, albums: true, tracks: true },
+      select: {
+        artists: {
+          select: {
+            id: true,
+            name: true,
+            grammy: true,
+          },
+        },
+        albums: {
+          select: {
+            id: true,
+            name: true,
+            year: true,
+            artistId: true,
+          },
+        },
+        tracks: {
+          select: {
+            id: true,
+            name: true,
+            duration: true,
+            albumId: true,
+            artistId: true,
+          },
+        },
+      },
     });
     return favs;
   }
@@ -30,7 +55,6 @@ export class FavsService {
     const actions = {
       track: async () => {
         const fav = await this.dataBase.track.findUnique({ where: { id } });
-        console.log(fav);
         if (fav) {
           await this.dataBase.track.update({
             where: { id },
