@@ -2,12 +2,19 @@ version: '3'
 
 services:
   app:
+    container_name: app
     build: .
     ports:
       - ${PORT}:${PORT}
     environment:
       - PORT=${PORT}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
   db:
+    container_name: db
     image: postgres:12
     restart: always
     environment:
@@ -16,3 +23,14 @@ services:
       - POSTGRES_DB=${POSTGRES_NAME}
     ports:
       - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "${POSTGRES_USERNAME}", "-d", "${POSTGRES_NAME}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
