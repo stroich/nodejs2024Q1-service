@@ -14,6 +14,13 @@ services:
         condition: service_healthy
     networks:
       - app-network
+    develop:
+      watch:
+        - path: ./package.json
+          action: rebuild
+        - path: ./src
+          target: /app/src
+          action: sync
   db:
     container_name: db
     image: postgres:12
