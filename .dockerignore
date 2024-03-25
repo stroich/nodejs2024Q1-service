@@ -1,0 +1,10 @@
+.git
+.idea
+node_modules
+
+.dockerignore
+.gitignore
+.eslintignore
+.eslintrc.js
+.prettierrc
+Dockerfile
