@@ -18,20 +18,10 @@ npm install
 
 4. Create .env
 
-```
-PORT=4000
-
-CRYPT_SALT=10
-JWT_SECRET_KEY=secret123123
-JWT_SECRET_REFRESH_KEY=secret123123
-TOKEN_EXPIRE_TIME=1h
-TOKEN_REFRESH_EXPIRE_TIME=24h
-```
-
-5. Start the server
+5. Running application
 
 ```
-npm run start:dev
+docker-compose up
 ```
 
 # Technologies
